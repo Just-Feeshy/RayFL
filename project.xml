@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
-	
+
 	<meta title="RayFL" package="com.sample.rayfl" version="1.0.0" company="Company Name" />
-	<app main="Main" path="Export" file="RayFL" />
-	
-	<source path="Source" />
-	
+	<app main="Main" path="export" file="RayFL" />
+
+	<source path="src" />
+
 	<haxelib name="openfl" />
-	
-	<assets path="Assets" rename="assets" />
-	
+
+	<assets path="assets"/>
 </project>
