@@ -69,7 +69,6 @@ $hxClasses["Main"] = Main;
 Main.__name__ = true;
 Main.main = function() {
 	kha_System.start(new kha_SystemOptions("Project",1280,720,null,new kha_FramebufferOptions(60,true,32,16,8,4)),function(_) {
-		console.log("Main.hx:13:","Hello, World!");
 	});
 };
 Math.__name__ = true;
