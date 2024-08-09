@@ -1,9 +1,5 @@
 let project = new Project('My Project');
-
-const fs = require('fs');
-
 const BUILD_DIR = 'build';
-const INDEX_HTML = 'index.html';
 
 project.addShaders('shaders/**');
 project.addAssets('assets/**.png');
