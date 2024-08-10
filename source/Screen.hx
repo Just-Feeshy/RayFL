@@ -1,5 +1,6 @@
 package;
 
+import kha.math.FastVector2;
 import kha.graphics5_.VertexStructure;
 import kha.graphics5_.Usage;
 import kha.graphics4.*;
@@ -10,10 +11,20 @@ class Screen {
 
     private var pipeline:PipelineState;
     private var time:ConstantLocation;
+    private var resolution:ConstantLocation;
+    private var cameraLocation:ConstantLocation;
+    private var resolutionVector:FastVector2;
 
+    public var camera(default, null):Camera;
     public var geometryBuffer(default, null):GeometryBuffer;
 
-    public function new() {
+    public var width(default, null):Int;
+    public var height(default, null):Int;
+
+    public function new(width:Int, height:Int) {
+        camera = new Camera();
+        resolutionVector = new FastVector2(width, height);
+
         var vertexStructure = new VertexStructure();
         vertexStructure.add('pos', VertexData.Float32_3X);
 
@@ -33,6 +44,8 @@ class Screen {
         pipeline.compile();
 
         // time = pipeline.getConstantLocation('iTime');
+        resolution = pipeline.getConstantLocation('iResolution');
+        cameraLocation = pipeline.getConstantLocation('iCamera');
 
         var vertexBuffer = new VertexBuffer(4, vertexStructure, Usage.StaticUsage);
         var indexBuffer = new IndexBuffer(6, Usage.StaticUsage);
@@ -68,8 +81,17 @@ class Screen {
 
     public function render(g:Graphics) {
         g.setPipeline(pipeline);
+        g.setVector2(resolution, resolutionVector);
+        g.setMatrix(cameraLocation, camera.modelViewProj);
         g.setVertexBuffer(geometryBuffer.vertexBuffer);
         g.setIndexBuffer(geometryBuffer.indexBuffer);
         g.drawIndexedVertices();
+    }
+
+    public function resize(width:Int, height:Int) {
+        resolutionVector.x = width;
+        resolutionVector.y = height;
+
+        camera.aspectRatio = width / height;
     }
 }

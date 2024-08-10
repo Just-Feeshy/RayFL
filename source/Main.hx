@@ -2,6 +2,7 @@ package;
 
 import kha.System;
 import kha.Assets;
+import kha.Window;
 import kha.Framebuffer;
 import kha.Scheduler;
 import kha.graphics4.*;
@@ -19,11 +20,14 @@ class Main {
     private var screen:Screen;
 
     private function new() {
+        var w = Window.get(0).width;
+        var h = Window.get(0).height;
 
-        trace("Width: " + System.windowWidth());
-        trace("Height: " + System.windowHeight());
+        Window.get(0).notifyOnResize(function(width, height) {
+            screen.resize(width, height);
+        });
 
-        screen = new Screen();
+        screen = new Screen(w, h);
     }
 
     private function render(framebuffer:Framebuffer) {
