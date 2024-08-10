@@ -23,6 +23,7 @@ class Screen {
 
     public function new(width:Int, height:Int) {
         camera = new Camera();
+        camera.aspectRatio = width / height;
         resolutionVector = new FastVector2(width, height);
 
         var vertexStructure = new VertexStructure();
