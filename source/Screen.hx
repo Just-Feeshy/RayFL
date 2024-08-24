@@ -84,8 +84,8 @@ class Screen {
         g.setPipeline(pipeline);
         g.setVector2(resolution, resolutionVector);
         g.setMatrix(cameraLocation, camera.modelViewProj);
-        g.setInt(spheresAmount, observableWorld.length);
         g.setTexture(spheresUnit, spheresBuffer);
+        g.setInt(spheresAmount, observableWorld.length);
         g.setVertexBuffer(geometryBuffer.vertexBuffer);
         g.setIndexBuffer(geometryBuffer.indexBuffer);
         g.drawIndexedVertices();
@@ -105,7 +105,7 @@ class Screen {
         final __width = observableWorld.length;
 
         if(width != spheresBuffer.width) {
-            spheresBuffer = Image.create(__width * 4, 1, TextureFormat.RGBA32, Usage.DynamicUsage);
+            spheresBuffer = Image.create(__width * 4, 1, TextureFormat.RGBA128, Usage.DynamicUsage);
         }
 
         var bytes = spheresBuffer.lock();
@@ -117,7 +117,7 @@ class Screen {
             var z = spheres[j].position.get(2);
             var w = spheres[j].position.get(3);
 
-            bytes.setFloat(j * 16, x);
+            bytes.setFloat(j * 16 + 0, x);
             bytes.setFloat(j * 16 + 4, y);
             bytes.setFloat(j * 16 + 8, z);
             bytes.setFloat(j * 16 + 12, w);

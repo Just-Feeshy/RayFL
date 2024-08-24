@@ -23,26 +23,8 @@ struct sphere {
 };
 
 vec4 unpackVec4FromTexture(int index) {
-    float texelSizeX = 1.0 / float(iSpheresAmount * 4);
-
-    // Compute texture coordinates for each component of the vec4
-    float baseCoordX = float(index * 4) * texelSizeX;
-    vec2 baseCoord = vec2(baseCoordX, 0.5);
-
-    // Sample 4 consecutive texels
-    vec4 v1 = texture(iSpheres, baseCoord);
-    vec4 v2 = texture(iSpheres, baseCoord + vec2(texelSizeX, 0.0));
-    vec4 v3 = texture(iSpheres, baseCoord + vec2(texelSizeX * 2.0, 0.0));
-    vec4 v4 = texture(iSpheres, baseCoord + vec2(texelSizeX * 3.0, 0.0));
-
-    // Reconstruct the floats from the sampled bytes
-    int x = int(v1.r * 255.0) << 24 | int(v1.g * 255.0) << 16 | int(v1.b * 255.0) << 8 | int(v1.a * 255.0);
-    int y = int(v2.r * 255.0) << 24 | int(v2.g * 255.0) << 16 | int(v2.b * 255.0) << 8 | int(v2.a * 255.0);
-    int z = int(v3.r * 255.0) << 24 | int(v3.g * 255.0) << 16 | int(v3.b * 255.0) << 8 | int(v3.a * 255.0);
-    int w = int(v4.r * 255.0) << 24 | int(v4.g * 255.0) << 16 | int(v4.b * 255.0) << 8 | int(v4.a * 255.0);
-
-    // Reinterpret the bytes as floats
-    return vec4(intBitsToFloat(x), intBitsToFloat(y), intBitsToFloat(z), intBitsToFloat(w));
+    float x = float(index) / float(iSpheresAmount);
+    return texture(iSpheres, vec2(x, 0.0));
 }
 
 vec3 at(float t, const vec3 origin, const vec3 direction) {
