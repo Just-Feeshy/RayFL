@@ -24,7 +24,8 @@ struct sphere {
 
 vec4 unpackVec4FromTexture(int index) {
     float x = float(index) / float(iSpheresAmount);
-    return texture(iSpheres, vec2(x, 0.0));
+    float offset = 1.0 / float(iSpheresAmount);
+    return texture(iSpheres, vec2(x, x + offset));
 }
 
 vec3 at(float t, const vec3 origin, const vec3 direction) {
@@ -91,7 +92,7 @@ color ray_color(const vec3 origin, const vec3 direction) {
     hit_record rec;
 
     if(hit_world(origin, direction, 0, 80.0, rec)) {
-        return 0.5 * (rec.normal + color(1.0));
+        return 0.5 * (rec.normal + vec3(1.0));
     }
 
     vec3 unit_direction = normalize(direction);
@@ -100,13 +101,13 @@ color ray_color(const vec3 origin, const vec3 direction) {
 }
 
 void main() {
-    float aspectRatio = iResolution.x / iResolution.y;
-    vec2 uv = ((gl_FragCoord.xy * 2.0 - iResolution.xy) / iResolution.y) * vec2(aspectRatio, 1.0);
+    vec2 uv = ((gl_FragCoord.xy * 2.0 - iResolution.xy) / iResolution.y);
 
-    vec3 ro = iCamera[3].xyz;
-    vec3 rd = normalize((iCamera * vec4(uv, 0.0, 1.0)).xyz);
+    // Camera Setup
+    float fov = 90.0;
+    vec3 ray_o = vec3(0.0, 0.0, -3.0);
+    vec3 ray_d = normalize(vec3(uv, 1.0));
 
-    vec3 col = ray_color(ro, rd);
-
+    vec3 col = ray_color(ray_o, ray_d);
     fragColor = vec4(col.xyz, 1.0);
 }
