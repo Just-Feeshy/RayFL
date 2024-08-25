@@ -24,7 +24,8 @@ struct sphere {
 
 vec4 unpackVec4FromTexture(int index) {
     float x = float(index) / float(iSpheresAmount);
-    return texture(iSpheres, vec2(x, 0.0));
+    float offset = 1.0 / float(iSpheresAmount);
+    return texture(iSpheres, vec2(x, x + offset));
 }
 
 vec3 at(float t, const vec3 origin, const vec3 direction) {
@@ -38,21 +39,20 @@ void set_face_front(inout hit_record rec, const vec3 direction, const vec3 outwa
 
 bool hit(const sphere s, const vec3 origin, const vec3 direction, float t_min, float t_max, inout hit_record rec) {
     vec3 oc = s.center - origin;
-    float a = dot(direction, direction);
     float h = dot(direction, oc);
     float c = dot(oc, oc) - s.radius * s.radius;
 
-    float discriminant = h * h - a * c;
+    float discriminant = h * h - c;
 
     if(discriminant < 0.0) {
         return false;
     }
 
     float sqrtd = sqrt(discriminant);
-    float root = (h - sqrtd) / a;
+    float root = h - sqrtd;
 
     if(root < t_min || t_max < root) {
-        root = (h + sqrtd) / a;
+        root = h + sqrtd;
         if(root <= t_min || t_max <= root) {
             return false;
         }
@@ -101,10 +101,10 @@ color ray_color(const vec3 origin, const vec3 direction) {
 
 void main() {
     float aspectRatio = iResolution.x / iResolution.y;
-    vec2 uv = ((gl_FragCoord.xy * 2.0 - iResolution.xy) / iResolution.y) * vec2(aspectRatio, 1.0);
+    vec2 uv = (gl_FragCoord.xy * 2.0 - iResolution.xy) / iResolution.y;
 
-    vec3 ro = iCamera[3].xyz;
-    vec3 rd = normalize((iCamera * vec4(uv, 0.0, 1.0)).xyz);
+    vec3 ro = vec3(0.0, 0.0, 3.0);
+    vec3 rd = normalize(vec3(uv, -1.0));
 
     vec3 col = ray_color(ro, rd);
 

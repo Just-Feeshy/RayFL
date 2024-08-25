@@ -9,8 +9,11 @@ package;
     public function new() {
         // This is where my code starts
 
-        var sphere = new Sphere(0, 0, -2.0, 0.5);
+        var sphere = new Sphere(0.0, 0.0, 0.0, 1.0);
         add(sphere);
+
+        var sphere2 = new Sphere(3.0, 0.0, 0.0, 0.75);
+        add(sphere2);
     }
 
     public function add(sphere:Sphere) {

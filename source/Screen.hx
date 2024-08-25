@@ -71,7 +71,7 @@ class Screen {
         indexBuffer.unlock();
 
         geometryBuffer = new GeometryBuffer(indexBuffer, vertexBuffer);
-        spheresBuffer = Image.create(4, 1, TextureFormat.RGBA32, Usage.DynamicUsage);
+        spheresBuffer = Image.create(1, 1, TextureFormat.RGBA32, Usage.DynamicUsage);
         observableWorld = new World();
     }
 
@@ -105,7 +105,7 @@ class Screen {
         final __width = observableWorld.length;
 
         if(width != spheresBuffer.width) {
-            spheresBuffer = Image.create(__width * 4, 1, TextureFormat.RGBA128, Usage.DynamicUsage);
+            spheresBuffer = Image.create(__width, 1, TextureFormat.RGBA128, Usage.DynamicUsage);
         }
 
         var bytes = spheresBuffer.lock();
