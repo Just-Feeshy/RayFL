@@ -22,6 +22,30 @@ struct sphere {
     float radius;
 };
 
+
+// Helper functions for interval arithmetic
+
+struct interval {
+    float min;
+    float max;
+};
+
+float size(interval ray_t, float x) {
+    return ray_t.max - ray_t.min;
+}
+
+bool contains(interval ray_t, float x) {
+    return ray_t.min <= x && x <= ray_t.max;
+}
+
+bool surrounds(interval ray_t, float x) {
+    return x <= ray_t.max && x >= ray_t.min;
+}
+
+
+// Helper functions for the ray tracing
+// TODO: Fix the `unpackVec4FromTexture` function, it seems broken
+
 vec4 unpackVec4FromTexture(int index) {
     float x = float(index) / float(iSpheresAmount);
     float offset = 1.0 / float(iSpheresAmount);
@@ -34,10 +58,10 @@ vec3 at(float t, const vec3 origin, const vec3 direction) {
 
 void set_face_front(inout hit_record rec, const vec3 direction, const vec3 outward_normal) {
     rec.front_face = dot(direction, outward_normal) < 0.0;
-    rec.normal = rec.front_face ? outward_normal : -outward_normal;
+    rec.normal = rec.front_face ? outward_normal * vec3(1.0, 1.0, -1.0) : outward_normal;
 }
 
-bool hit(const sphere s, const vec3 origin, const vec3 direction, float t_min, float t_max, inout hit_record rec) {
+bool hit(const sphere s, const vec3 origin, const vec3 direction, interval ray_t, inout hit_record rec) {
     vec3 oc = s.center - origin;
     float h = dot(direction, oc);
     float c = dot(oc, oc) - s.radius * s.radius;
@@ -51,9 +75,10 @@ bool hit(const sphere s, const vec3 origin, const vec3 direction, float t_min, f
     float sqrtd = sqrt(discriminant);
     float root = h - sqrtd;
 
-    if(root < t_min || t_max < root) {
+    if(!surrounds(ray_t, root)) {
         root = h + sqrtd;
-        if(root <= t_min || t_max <= root) {
+
+        if(!surrounds(ray_t, root)) {
             return false;
         }
     }
@@ -66,10 +91,10 @@ bool hit(const sphere s, const vec3 origin, const vec3 direction, float t_min, f
     return true;
 }
 
-bool hit_world(vec3 origin, vec3 direction, float t_min, float t_max, inout hit_record rec) {
+bool hit_world(vec3 origin, vec3 direction, interval ray_t, inout hit_record rec) {
     hit_record temp_rec;
     bool hit_anything = false;
-    float closest_so_far = t_max;
+    float closest_so_far = ray_t.max;
     sphere s;
 
     for(int i=0; i<iSpheresAmount; i++) {
@@ -77,7 +102,7 @@ bool hit_world(vec3 origin, vec3 direction, float t_min, float t_max, inout hit_
         s.center = sphereData.xyz;
         s.radius = sphereData.w;
 
-        if(hit(s, origin, direction, t_min, closest_so_far, temp_rec)) {
+        if(hit(s, origin, direction, interval(ray_t.min, closest_so_far), temp_rec)) {
             hit_anything = true;
             closest_so_far = temp_rec.t;
             rec = temp_rec;
@@ -90,7 +115,7 @@ bool hit_world(vec3 origin, vec3 direction, float t_min, float t_max, inout hit_
 color ray_color(const vec3 origin, const vec3 direction) {
     hit_record rec;
 
-    if(hit_world(origin, direction, 0, 80.0, rec)) {
+    if(hit_world(origin, direction, interval(0, 80), rec)) {
         return 0.5 * (rec.normal + color(1.0));
     }
 
@@ -103,8 +128,8 @@ void main() {
     float aspectRatio = iResolution.x / iResolution.y;
     vec2 uv = (gl_FragCoord.xy * 2.0 - iResolution.xy) / iResolution.y;
 
-    vec3 ro = vec3(0.0, 0.0, 3.0);
-    vec3 rd = normalize(vec3(uv, -1.0));
+    vec3 ro = vec3(0.0, 0.0, -3.0);
+    vec3 rd = normalize(vec3(uv, 1.0));
 
     vec3 col = ray_color(ro, rd);
 
