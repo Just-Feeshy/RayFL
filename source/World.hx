@@ -12,7 +12,7 @@ package;
         var sphere = new Sphere(0.0, 0.0, 0.0, 1.0);
         add(sphere);
 
-        var sphere2 = new Sphere(3.0, 0.0, 0.0, 0.75);
+        var sphere2 = new Sphere(3.0, 0.0, -4.0, 0.75);
         add(sphere2);
     }
 

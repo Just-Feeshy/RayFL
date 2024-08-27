@@ -7,6 +7,7 @@ uniform vec2 iResolution;
 uniform mat4 iCamera;
 uniform sampler2D iSpheres;
 uniform int iSpheresAmount;
+uniform int iSamples;
 
 out vec4 fragColor;
 
@@ -21,7 +22,6 @@ struct sphere {
     vec3 center;
     float radius;
 };
-
 
 // Helper functions for interval arithmetic
 
@@ -58,7 +58,7 @@ vec3 at(float t, const vec3 origin, const vec3 direction) {
 
 void set_face_front(inout hit_record rec, const vec3 direction, const vec3 outward_normal) {
     rec.front_face = dot(direction, outward_normal) < 0.0;
-    rec.normal = rec.front_face ? outward_normal * vec3(1.0, 1.0, -1.0) : outward_normal;
+    rec.normal = rec.front_face ? outward_normal * vec3(1.0, 1.0, -1.0) : outward_normal * vec3(-1.0, -1.0, 1.0);
 }
 
 bool hit(const sphere s, const vec3 origin, const vec3 direction, interval ray_t, inout hit_record rec) {
@@ -124,6 +124,24 @@ color ray_color(const vec3 origin, const vec3 direction) {
     return (1.0 - t) * color(1.0) + t * vec3(0.5, 0.7, 1.0);
 }
 
+float random(vec2 st) {
+    return fract(sin(dot(st.xy,
+        vec2(12.9898, 78.233))) * 43758.5453123
+    );
+}
+
+void render(vec3 ro, vec3 rd) {
+    vec3 col = vec3(0.0);
+
+    for(int i=0; i<iSamples; i++) {
+        vec2 rnd = vec2(random(vec2(rd.x + float(i), rd.y + float(i))));
+        vec3 rd_jittered = normalize(rd + vec3(rnd / iResolution.xy, 0.0));
+        col += ray_color(ro, rd_jittered);
+    }
+
+    fragColor = vec4(col.xyz / iSamples, 1.0);
+}
+
 void main() {
     float aspectRatio = iResolution.x / iResolution.y;
     vec2 uv = (gl_FragCoord.xy * 2.0 - iResolution.xy) / iResolution.y;
@@ -131,7 +149,5 @@ void main() {
     vec3 ro = vec3(0.0, 0.0, -3.0);
     vec3 rd = normalize(vec3(uv, 1.0));
 
-    vec3 col = ray_color(ro, rd);
-
-    fragColor = vec4(col.xyz, 1.0);
+    render(ro, rd);
 }

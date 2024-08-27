@@ -19,6 +19,7 @@ class Screen {
     private var resolution:ConstantLocation;
     private var cameraLocation:ConstantLocation;
     private var spheresAmount:ConstantLocation;
+    private var sppLocation:ConstantLocation;
     private var spheresUnit:TextureUnit;
     private var spheresBuffer:Image;
     private var resolutionVector:FastVector2;
@@ -85,6 +86,7 @@ class Screen {
         g.setVector2(resolution, resolutionVector);
         g.setMatrix(cameraLocation, camera.modelViewProj);
         g.setTexture(spheresUnit, spheresBuffer);
+        g.setInt(sppLocation, camera.samplesPerPixel);
         g.setInt(spheresAmount, observableWorld.length);
         g.setVertexBuffer(geometryBuffer.vertexBuffer);
         g.setIndexBuffer(geometryBuffer.indexBuffer);
@@ -150,5 +152,6 @@ class Screen {
         spheresUnit = pipeline.getTextureUnit('iSpheres');
         spheresAmount = pipeline.getConstantLocation('iSpheresAmount');
         cameraLocation = pipeline.getConstantLocation('iCamera');
+        sppLocation = pipeline.getConstantLocation('iSamples');
     }
 }

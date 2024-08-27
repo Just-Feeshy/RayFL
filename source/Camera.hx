@@ -9,6 +9,7 @@ class Camera {
 
     public var position(default, set):Vector3;
     public var fov = 80 * Math.PI / 180;
+    public var samplesPerPixel:Int = 100;
     public var projection:FastMatrix4;
     public var view:FastMatrix4;
 
