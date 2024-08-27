@@ -124,11 +124,21 @@ color ray_color(const vec3 origin, const vec3 direction) {
     return (1.0 - t) * color(1.0) + t * vec3(0.5, 0.7, 1.0);
 }
 
+
+// Credit to: https://thebookofshaders.com/10/
+
 float random(vec2 st) {
     return fract(sin(dot(st.xy,
         vec2(12.9898, 78.233))) * 43758.5453123
     );
 }
+
+float random(vec2 st, float min, float max) {
+    return mix(min, max, random(st));
+}
+
+
+// Main rendering function
 
 void render(vec3 ro, vec3 rd) {
     vec3 col = vec3(0.0);
