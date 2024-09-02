@@ -6,6 +6,7 @@ import kha.Window;
 import kha.Framebuffer;
 import kha.Scheduler;
 import kha.graphics4.*;
+import components.Input;
 
 #if kha_html5
 import js.Browser.document;
@@ -18,6 +19,8 @@ class Main {
     private static var FRAMERATE = 60;
 
     private var screen:Screen;
+    private var camera:Camera;
+    private var input:Input;
 
     private function new() {
         var w = Window.get(0).width;
@@ -27,7 +30,57 @@ class Main {
             screen.resize(width, height);
         });
 
-        screen = new Screen(w, h);
+        camera = new Camera();
+        screen = new Screen(w, h, camera);
+        input = new Input(Device.KEYBOARD);
+
+        input.setupNotifications(__onMouse);
+    }
+
+    private function clamp(value:Float, min:Float, max:Float):Float {
+        return Math.min(Math.max(value, min), max);
+    }
+
+    // Update game logic here (Input)
+    private function update():Void {
+
+        // Every expensive operation done here
+        camera.rotation.x = Math.PI * clamp(screen.mouseVector.x / screen.width, -0.5, 0.5);
+        camera.rotation.y = Math.PI * clamp(screen.mouseVector.y / screen.height, -0.5, 0.5);
+
+        if(input.controlStatus & Controls.MOVE_FOWARD != 0) {
+            camera.position.z += 1 * Math.cos(camera.rotation.x) * Math.cos(camera.rotation.y);
+            camera.position.x += 1 * Math.sin(camera.rotation.x) * Math.cos(camera.rotation.y);
+            camera.position.y += 1 * Math.sin(camera.rotation.y);
+        }
+
+        if(input.controlStatus & Controls.MOVE_BACKWARDS != 0) {
+            camera.position.z -= 1 * Math.cos(camera.rotation.x) * Math.cos(camera.rotation.y);
+            camera.position.x -= 1 * Math.sin(camera.rotation.x) * Math.cos(camera.rotation.y);
+            camera.position.y -= 1 * Math.sin(camera.rotation.y);
+        }
+
+        if(input.controlStatus & Controls.MOVE_RIGHT != 0) {
+            camera.position.x += 1 * Math.cos(camera.rotation.x);
+            camera.position.z += 1 * Math.sin(camera.rotation.x);
+        }
+
+        if(input.controlStatus & Controls.MOVE_LEFT != 0) {
+            camera.position.x -= 1 * Math.cos(camera.rotation.x);
+            camera.position.z -= 1 * Math.sin(camera.rotation.x);
+        }
+
+        if(input.controlStatus & Controls.MOVE_UP != 0) {
+            camera.position.y += 1 * Math.cos(camera.rotation.y);
+            camera.position.z += 1 * Math.sin(camera.rotation.y) * Math.sin(camera.rotation.y);
+            camera.position.x += 1 * Math.cos(camera.rotation.y) * Math.sin(camera.rotation.y);
+        }
+
+        if(input.controlStatus & Controls.MOVE_DOWN != 0) {
+            camera.position.y -= 1 * Math.cos(camera.rotation.y);
+            camera.position.z -= 1 * Math.sin(camera.rotation.y) * Math.sin(camera.rotation.y);
+            camera.position.x -= 1 * Math.cos(camera.rotation.y) * Math.sin(camera.rotation.y);
+        }
     }
 
     private function render(framebuffer:Framebuffer) {
@@ -38,8 +91,8 @@ class Main {
         g4.end();
     }
 
-    private function update():Void {
-
+    @:noCompletion private function __onMouse(x:Int, y:Int, dx:Int, dy:Int) {
+        screen.updateMouse(x - (screen.width >> 1), y - (screen.height >> 1));
     }
 
     public static function main() {

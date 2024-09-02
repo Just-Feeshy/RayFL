@@ -19,59 +19,42 @@ class Screen {
     private var resolution:ConstantLocation;
     private var cameraLocation:ConstantLocation;
     private var spheresAmount:ConstantLocation;
-    private var sppLocation:ConstantLocation;
+    private var mouseLocation:ConstantLocation;
     private var spheresUnit:TextureUnit;
     private var spheresBuffer:Image;
     private var resolutionVector:FastVector2;
 
+    public var mouseVector(default, null):FastVector2;
     public var camera(default, null):Camera;
-    public var geometryBuffer(default, null):GeometryBuffer;
-
     public var width(default, null):Int;
     public var height(default, null):Int;
 
-    public function new(width:Int, height:Int) {
+    public function new(width:Int, height:Int, camera:Camera) {
         this.width = width;
         this.height = height;
+        this.camera = camera;
 
-        camera = new Camera();
-        camera.aspectRatio = width / height;
         resolutionVector = new FastVector2(width, height);
-
+        mouseVector = new FastVector2(0, 0);
         setupPipeline();
 
-        var vertexBuffer = new VertexBuffer(4, structure, Usage.StaticUsage);
-        var indexBuffer = new IndexBuffer(6, Usage.StaticUsage);
-        var vertexBufferData = vertexBuffer.lock();
+        vertexBuffer = new VertexBuffer(4, structure, Usage.StaticUsage);
+        var vertices = vertexBuffer.lock();
 
-        var vertices = [
-            // Positions
-            -1.0, -1.0, 0.0,
-             1.0, -1.0, 0.0,
-             1.0,  1.0, 0.0,
-            -1.0,  1.0, 0.0
-        ];
+        vertices.set(0, 0.0); // Bottom-left
+        vertices.set(1, 0.0); // Bottom-left
 
-        var indices = [
-            0, 1, 2,
-            2, 3, 0
-        ];
+        vertices.set(2, width); // Bottom-right
+        vertices.set(3, 0.0); // Bottom-right
 
-        var vertexBufferData = vertexBuffer.lock();
-        var indexBufferData = indexBuffer.lock();
+        vertices.set(4, width); // Top-right
+        vertices.set(5, height); // Top-right
 
-        for(i in 0...vertices.length) {
-            vertexBufferData.set(i, vertices[i]);
-        }
-
-        for(i in 0...indices.length) {
-            indexBufferData.set(i, indices[i]);
-        }
+        vertices.set(6, 0.0); // Top-left
+        vertices.set(7, height);  // Top-left
 
         vertexBuffer.unlock();
-        indexBuffer.unlock();
 
-        geometryBuffer = new GeometryBuffer(indexBuffer, vertexBuffer);
         spheresBuffer = Image.create(1, 1, TextureFormat.RGBA32, Usage.DynamicUsage);
         observableWorld = new World();
     }
@@ -84,13 +67,12 @@ class Screen {
 
         g.setPipeline(pipeline);
         g.setVector2(resolution, resolutionVector);
-        g.setMatrix(cameraLocation, camera.modelViewProj);
+        g.setVector3(cameraLocation, camera.position);
+        g.setVector2(mouseLocation, mouseVector);
         g.setTexture(spheresUnit, spheresBuffer);
-        g.setInt(sppLocation, camera.samplesPerPixel);
         g.setInt(spheresAmount, observableWorld.length);
-        g.setVertexBuffer(geometryBuffer.vertexBuffer);
-        g.setIndexBuffer(geometryBuffer.indexBuffer);
-        g.drawIndexedVertices();
+        g.setVertexBuffer(vertexBuffer);
+        g.drawIndexedVertices(0, 6);
     }
 
     public function resize(width:Int, height:Int) {
@@ -99,8 +81,11 @@ class Screen {
 
         resolutionVector.x = width;
         resolutionVector.y = height;
+    }
 
-        camera.aspectRatio = width / height;
+    public function updateMouse(x:Int, y:Int):Void {
+        mouseVector.x = x;
+        mouseVector.y = y;
     }
 
     private function writeToSphereBuffer():Void {
@@ -130,7 +115,7 @@ class Screen {
 
     private function setupPipeline():Void {
         structure = new VertexStructure();
-        structure.add('pos', VertexData.Float32_3X);
+        structure.add('pos', VertexData.Float32_2X);
 
         pipeline = new PipelineState();
         pipeline.depthWrite = true;
@@ -151,7 +136,7 @@ class Screen {
         resolution = pipeline.getConstantLocation('iResolution');
         spheresUnit = pipeline.getTextureUnit('iSpheres');
         spheresAmount = pipeline.getConstantLocation('iSpheresAmount');
-        cameraLocation = pipeline.getConstantLocation('iCamera');
-        sppLocation = pipeline.getConstantLocation('iSamples');
+        cameraLocation = pipeline.getConstantLocation('iCam');
+        mouseLocation = pipeline.getConstantLocation('iMouse');
     }
 }
