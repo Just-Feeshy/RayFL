@@ -75,9 +75,9 @@ class Camera {
         matrix = __matrix_rot_x.multmat(__matrix_rot_y);
 
         // Update camera front
-        front.z = cos_y;
-        front.y = 0.0;
-        front.x = -sin_y;
+        front.z = cos_y * cos_x;
+        front.y = sin_x;
+        front.x = -sin_y * cos_x;
         front = front.normalized();
     }
 
