@@ -19,12 +19,11 @@ class Screen {
     private var resolution:ConstantLocation;
     private var cameraLocation:ConstantLocation;
     private var spheresAmount:ConstantLocation;
-    private var mouseLocation:ConstantLocation;
+    private var matrixLocation:ConstantLocation;
     private var spheresUnit:TextureUnit;
     private var spheresBuffer:Image;
     private var resolutionVector:FastVector2;
 
-    public var mouseVector(default, null):FastVector2;
     public var camera(default, null):Camera;
     public var width(default, null):Int;
     public var height(default, null):Int;
@@ -35,7 +34,6 @@ class Screen {
         this.camera = camera;
 
         resolutionVector = new FastVector2(width, height);
-        mouseVector = new FastVector2(0, 0);
         setupPipeline();
 
         vertexBuffer = new VertexBuffer(4, structure, Usage.StaticUsage);
@@ -68,10 +66,10 @@ class Screen {
         g.setPipeline(pipeline);
         g.setVector2(resolution, resolutionVector);
         g.setVector3(cameraLocation, camera.position);
-        g.setVector2(mouseLocation, mouseVector);
         g.setTexture(spheresUnit, spheresBuffer);
         g.setInt(spheresAmount, observableWorld.length);
         g.setVertexBuffer(vertexBuffer);
+        g.setMatrix3(matrixLocation, camera.matrix);
         g.drawIndexedVertices(0, 6);
     }
 
@@ -81,11 +79,6 @@ class Screen {
 
         resolutionVector.x = width;
         resolutionVector.y = height;
-    }
-
-    public function updateMouse(x:Int, y:Int):Void {
-        mouseVector.x = x;
-        mouseVector.y = y;
     }
 
     private function writeToSphereBuffer():Void {
@@ -137,6 +130,6 @@ class Screen {
         spheresUnit = pipeline.getTextureUnit('iSpheres');
         spheresAmount = pipeline.getConstantLocation('iSpheresAmount');
         cameraLocation = pipeline.getConstantLocation('iCam');
-        mouseLocation = pipeline.getConstantLocation('iMouse');
+        matrixLocation = pipeline.getConstantLocation('iMat');
     }
 }

@@ -17,6 +17,7 @@ import kha.Macros;
 
 class Main {
     private static var FRAMERATE = 60;
+    private static var TAU = 2 * Math.PI;
 
     private var screen:Screen;
     private var camera:Camera;
@@ -34,6 +35,10 @@ class Main {
         screen = new Screen(w, h, camera);
         input = new Input(Device.KEYBOARD);
 
+        #if debug
+        input.debugCallback = camera.toString;
+        #end
+
         input.setupNotifications(__onMouse);
     }
 
@@ -43,43 +48,35 @@ class Main {
 
     // Update game logic here (Input)
     private function update():Void {
-
-        // Every expensive operation done here
-        camera.rotation.x = Math.PI * clamp(screen.mouseVector.x / screen.width, -0.5, 0.5);
-        camera.rotation.y = Math.PI * clamp(screen.mouseVector.y / screen.height, -0.5, 0.5);
-
         if(input.controlStatus & Controls.MOVE_FOWARD != 0) {
-            camera.position.z += 1 * Math.cos(camera.rotation.x) * Math.cos(camera.rotation.y);
-            camera.position.x += 1 * Math.sin(camera.rotation.x) * Math.cos(camera.rotation.y);
-            camera.position.y += 1 * Math.sin(camera.rotation.y);
+            trace("Moving foward: " + camera.front);
+            camera.position.x -= camera.front.x;
+            camera.position.y -= camera.front.y;
+            camera.position.z += camera.front.z;
+            // camera.position.z += 1;
         }
 
         if(input.controlStatus & Controls.MOVE_BACKWARDS != 0) {
-            camera.position.z -= 1 * Math.cos(camera.rotation.x) * Math.cos(camera.rotation.y);
-            camera.position.x -= 1 * Math.sin(camera.rotation.x) * Math.cos(camera.rotation.y);
-            camera.position.y -= 1 * Math.sin(camera.rotation.y);
+            camera.position.x += camera.front.x;
+            camera.position.y -= camera.front.y;
+            camera.position.z -= camera.front.z;
+            // camera.position.z -= 1;
         }
 
         if(input.controlStatus & Controls.MOVE_RIGHT != 0) {
-            camera.position.x += 1 * Math.cos(camera.rotation.x);
-            camera.position.z += 1 * Math.sin(camera.rotation.x);
+            var cross = camera.front.cross(camera.up).normalized();
+
+            camera.position.x -= cross.x;
+            camera.position.z += cross.z;
+
+            // camera.position.x += 1;
         }
 
         if(input.controlStatus & Controls.MOVE_LEFT != 0) {
-            camera.position.x -= 1 * Math.cos(camera.rotation.x);
-            camera.position.z -= 1 * Math.sin(camera.rotation.x);
-        }
+            var cross = camera.front.cross(camera.up).normalized();
 
-        if(input.controlStatus & Controls.MOVE_UP != 0) {
-            camera.position.y += 1 * Math.cos(camera.rotation.y);
-            camera.position.z += 1 * Math.sin(camera.rotation.y) * Math.sin(camera.rotation.y);
-            camera.position.x += 1 * Math.cos(camera.rotation.y) * Math.sin(camera.rotation.y);
-        }
-
-        if(input.controlStatus & Controls.MOVE_DOWN != 0) {
-            camera.position.y -= 1 * Math.cos(camera.rotation.y);
-            camera.position.z -= 1 * Math.sin(camera.rotation.y) * Math.sin(camera.rotation.y);
-            camera.position.x -= 1 * Math.cos(camera.rotation.y) * Math.sin(camera.rotation.y);
+            camera.position.x += cross.x;
+            camera.position.z -= cross.z;
         }
     }
 
@@ -91,8 +88,12 @@ class Main {
         g4.end();
     }
 
-    @:noCompletion private function __onMouse(x:Int, y:Int, dx:Int, dy:Int) {
-        screen.updateMouse(x - (screen.width >> 1), y - (screen.height >> 1));
+    @:noCompletion private function __onMouse(x:Int, y:Int, dx:Int, dy:Int):Void {
+        if(!input.focused) return;
+
+        camera.rotation.x = (camera.rotation.x + dx / 512) % TAU;
+        camera.rotation.y = clamp((camera.rotation.y + dy / 512), -Math.PI / 2, Math.PI / 2);
+        camera.updateMatrix();
     }
 
     public static function main() {

@@ -1,10 +1,12 @@
 #version 450
 
+#include "cursor.glsl"
+
 #define PI 3.14159265
 #define TAU (2*PI)
 
 uniform vec3 iCam;
-uniform vec2 iMouse;
+uniform mat3 iMat;
 uniform vec2 iResolution;
 uniform sampler2D iSpheres;
 uniform int iSpheresAmount;
@@ -18,21 +20,11 @@ struct ray {
     vec3 direction;
 };
 
-void pR(inout vec2 p, float a) {
-	p = cos(a) * p + sin(a) * vec2(p.y, -p.x);
-}
-
 mat3 getCamera(vec3 ro, vec3 lookAt) {
     vec3 ww = normalize(lookAt - ro);
     vec3 uu = normalize(cross(vec3(0.0, 1.0, 0.0), ww));
     vec3 vv = cross(uu, ww);
     return mat3(uu, vv, ww);
-}
-
-void mouseControl(inout vec3 ro) {
-    vec2 mouse = iMouse.xy / iResolution.xy;
-    pR(ro.yz, -mouse.y * PI);
-    pR(ro.xz, mouse.x * PI);
 }
 
 bool sphere(ray r, float radius, out float t) {
@@ -53,11 +45,8 @@ bool sphere(ray r, float radius, out float t) {
 void main() {
     vec2 uv = (2.0 * gl_FragCoord.xy - iResolution.xy) / iResolution.y;
 
-    vec3 ro = iCam;
-    mouseControl(ro);
-
-    vec3 lookAt = vec3(0.0, 1.0, 0.0);
-    vec3 rd = normalize(vec3(uv, FOV));
+    vec3 ro = iCam - vec3(0.0, 0.0, 100.0);
+    vec3 rd = normalize(normalize(vec3(uv, FOV)) * iMat);
 
     vec3 col = vec3(0.0);
     float dist = 0.0;
@@ -65,9 +54,14 @@ void main() {
     bool hit_sphere = sphere(ray(ro, rd), 20.0, dist);
 
     if (hit_sphere) {
-        vec3 nor = normalize(ro + rd * dist);
-        col = (nor + 1.0) / 2.0;
+        vec3 p = ro + rd * dist;
+        vec3 nor = normalize(p);
+        vec3 ligthDir = vec3(3.0, 1.0, 0.0);
+        float light = dot(nor, ligthDir);
+        float normlight = max(0.1, (light + 1.0) * 0.5);
+        col = vec3(1.0) * normlight;
     }
 
+    col = cursor(uv, col);
     fragColor = vec4(col, 1.0);
 }
