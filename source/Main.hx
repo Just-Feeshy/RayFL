@@ -49,7 +49,6 @@ class Main {
     // Update game logic here (Input)
     private function update():Void {
         if(input.controlStatus & Controls.MOVE_FOWARD != 0) {
-            trace("Moving foward: " + camera.front);
             camera.position.x -= camera.front.x;
             camera.position.y -= camera.front.y;
             camera.position.z += camera.front.z;
@@ -68,8 +67,6 @@ class Main {
 
             camera.position.x -= cross.x;
             camera.position.z += cross.z;
-
-            // camera.position.x += 1;
         }
 
         if(input.controlStatus & Controls.MOVE_LEFT != 0) {
