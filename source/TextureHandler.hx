@@ -20,7 +20,7 @@ class TextureHandler {
         textures = pipeline.getTextureUnit('textures');
 
         for(imageName in __requiredImagesByName) {
-            Assets.loadImage(imageName, loadAllImages, function(error) {
+            Assets.loadImageFromPath(imageName, true, loadAllImages, function(error) {
                 trace('Error loading image: ' + error);
             });
         }
@@ -52,7 +52,11 @@ class TextureHandler {
         while(__images[0] != null) {
             var image = __images.pop();
             var capacity = width * height * imageFormatSize(image);
-            bytes.blit(offset, image.getPixels(), 0, capacity);
+
+            var memory = image.lock();
+            bytes.blit(offset, memory, 0, capacity);
+            image.unlock();
+
             offset += image.width * image.height * imageFormatSize(image);
         }
 
