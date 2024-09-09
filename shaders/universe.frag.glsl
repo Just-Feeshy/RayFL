@@ -8,8 +8,9 @@
 uniform vec3 iCam;
 uniform mat3 iMat;
 uniform vec2 iResolution;
-uniform sampler2D iSpheres;
-uniform int iSpheresAmount;
+uniform sampler3D textures;
+// uniform sampler2D iSpheres;
+// uniform int iSpheresAmount;
 
 out vec4 fragColor;
 
@@ -20,23 +21,20 @@ struct ray {
     vec3 direction;
 };
 
-mat3 getCamera(vec3 ro, vec3 lookAt) {
-    vec3 ww = normalize(lookAt - ro);
-    vec3 uu = normalize(cross(vec3(0.0, 1.0, 0.0), ww));
-    vec3 vv = cross(uu, ww);
-    return mat3(uu, vv, ww);
+float atan2(in float y, in float x) {
+    return x == 0.0 ? sign(y) * PI / 2.0 : atan(y, x);
 }
 
 bool sphere(ray r, float radius, out float t) {
-    float a = dot(r.direction, r.direction);
+    // float a = dot(r.direction, r.direction);
     float b = dot(r.origin, r.direction);
     float c = dot(r.origin, r.origin) - radius * radius;
-    float disc = b * b - a * c;
+    float disc = b * b - c;
 
     if (disc > 0.0) {
-        t = (-b + sqrt(disc)) / a;
+        t = (-b - sqrt(disc));
     }else {
-        t = -b / a;
+        t = -b;
     }
 
     return disc > 0.0 && dot(r.direction, -r.origin) > 0.0;

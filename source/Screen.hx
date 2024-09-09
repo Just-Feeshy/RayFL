@@ -10,7 +10,9 @@ import haxe.io.Bytes;
 import haxe.io.FPHelper;
 
 class Screen {
-    private var observableWorld:World;
+    // private var observableWorld:World;
+    private var textureHandler:TextureHandler;
+
     private var structure:VertexStructure;
     private var vertexBuffer:VertexBuffer;
 
@@ -18,10 +20,10 @@ class Screen {
     private var time:ConstantLocation;
     private var resolution:ConstantLocation;
     private var cameraLocation:ConstantLocation;
-    private var spheresAmount:ConstantLocation;
     private var matrixLocation:ConstantLocation;
-    private var spheresUnit:TextureUnit;
-    private var spheresBuffer:Image;
+    // private var spheresAmount:ConstantLocation;
+    // private var spheresUnit:TextureUnit; // TODO: Put this in the textureHandler
+    // private var spheresBuffer:Image;
     private var resolutionVector:FastVector2;
 
     public var camera(default, null):Camera;
@@ -53,24 +55,29 @@ class Screen {
 
         vertexBuffer.unlock();
 
-        spheresBuffer = Image.create(1, 1, TextureFormat.RGBA32, Usage.DynamicUsage);
-        observableWorld = new World();
+        // spheresBuffer = Image.create(1, 1, TextureFormat.RGBA32, Usage.DynamicUsage);
+        // observableWorld = new World();
+        textureHandler = new TextureHandler(pipeline);
     }
 
     public function render(g:Graphics) {
+        /*
         if(observableWorld.__dirtySphereChange) {
             writeToSphereBuffer();
             observableWorld.__dirtySphereChange = false;
         }
+        */
 
         g.setPipeline(pipeline);
         g.setVector2(resolution, resolutionVector);
         g.setVector3(cameraLocation, camera.position);
-        g.setTexture(spheresUnit, spheresBuffer);
-        g.setInt(spheresAmount, observableWorld.length);
         g.setVertexBuffer(vertexBuffer);
         g.setMatrix3(matrixLocation, camera.matrix);
         g.drawIndexedVertices(0, 6);
+        // g.setTexture(spheresUnit, spheresBuffer);
+        // g.setInt(spheresAmount, observableWorld.length);
+
+        textureHandler.render(g);
     }
 
     public function resize(width:Int, height:Int) {
@@ -81,6 +88,7 @@ class Screen {
         resolutionVector.y = height;
     }
 
+    /*
     private function writeToSphereBuffer():Void {
         final __width = observableWorld.length;
 
@@ -105,6 +113,7 @@ class Screen {
 
         spheresBuffer.unlock();
     }
+    */
 
     private function setupPipeline():Void {
         structure = new VertexStructure();
@@ -125,10 +134,10 @@ class Screen {
 
         pipeline.compile();
 
+        // spheresUnit = pipeline.getTextureUnit('iSpheres');
+        // spheresAmount = pipeline.getConstantLocation('iSpheresAmount');
         // time = pipeline.getConstantLocation('iTime');
         resolution = pipeline.getConstantLocation('iResolution');
-        spheresUnit = pipeline.getTextureUnit('iSpheres');
-        spheresAmount = pipeline.getConstantLocation('iSpheresAmount');
         cameraLocation = pipeline.getConstantLocation('iCam');
         matrixLocation = pipeline.getConstantLocation('iMat');
     }

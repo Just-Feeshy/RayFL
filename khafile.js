@@ -3,6 +3,7 @@ const BUILD_DIR = 'build';
 
 project.addShaders('shaders/**');
 project.addAssets('assets/**.png');
+project.addAssets('assets/**.jpeg');
 project.addSources('source');
 project.addParameter('-dce full'); // Dead Code Elimination (Haxe, do your thing!)
 project.buildPath = BUILD_DIR;
