@@ -2,6 +2,7 @@ package;
 
 import kha.Image;
 import kha.Shaders;
+import kha.System;
 import kha.math.FastVector2;
 import kha.graphics5_.VertexStructure;
 import kha.graphics5_.Usage;
@@ -38,6 +39,9 @@ class Screen {
         resolutionVector = new FastVector2(width, height);
         setupPipeline();
 
+        // observableWorld = new World();
+        textureHandler = new TextureHandler(pipeline);
+
         vertexBuffer = new VertexBuffer(4, structure, Usage.StaticUsage);
         var vertices = vertexBuffer.lock();
 
@@ -56,8 +60,6 @@ class Screen {
         vertexBuffer.unlock();
 
         // spheresBuffer = Image.create(1, 1, TextureFormat.RGBA32, Usage.DynamicUsage);
-        // observableWorld = new World();
-        textureHandler = new TextureHandler(pipeline);
     }
 
     public function render(g:Graphics) {
@@ -69,6 +71,7 @@ class Screen {
         */
 
         g.setPipeline(pipeline);
+        g.setFloat(time, System.time);
         g.setVector2(resolution, resolutionVector);
         g.setVector3(cameraLocation, camera.position);
         g.setVertexBuffer(vertexBuffer);
@@ -136,7 +139,7 @@ class Screen {
 
         // spheresUnit = pipeline.getTextureUnit('iSpheres');
         // spheresAmount = pipeline.getConstantLocation('iSpheresAmount');
-        // time = pipeline.getConstantLocation('iTime');
+        time = pipeline.getConstantLocation('iTime');
         resolution = pipeline.getConstantLocation('iResolution');
         cameraLocation = pipeline.getConstantLocation('iCam');
         matrixLocation = pipeline.getConstantLocation('iMat');
