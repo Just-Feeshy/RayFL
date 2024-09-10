@@ -60,9 +60,7 @@ bool sphere(ray r, float radius, out float t) {
     return disc > 0.0 && dot(r.direction, -r.origin) > 0.0;
 }
 
-void main() {
-    vec2 uv = (2.0 * gl_FragCoord.xy - iResolution.xy) / iResolution.y;
-
+vec3 render(vec2 uv) {
     vec3 ro = iCam - vec3(0.0, 0.0, 100.0);
     vec3 rd = normalize(normalize(vec3(uv, FOV)) * iMat);
 
@@ -88,6 +86,21 @@ void main() {
         col = (planet.rgb * normlight) + (atmosphere.rgb * atmosphere.a * 0.5 * min(1.0, normlight + darkAverage)) + ((1.0 - sqrt(normlight)) * dark.rgb);
     }
 
-    col = cursor(uv, col);
+    return col;
+}
+
+vec2 getUV(vec2 rayOffset) {
+    return (2.0 * (gl_FragCoord.xy + rayOffset) - iResolution.xy) / iResolution.y;
+}
+
+vec3 renderAAx4() {
+    vec4 offsets = vec4(0.125, -0.125, 0.375, -0.375);
+    vec3 colAA = render(getUV(offsets.xz)) + render(getUV(offsets.yw)) + render(getUV(offsets.wx)) + render(getUV(offsets.zy));
+    return colAA * 0.25;
+}
+
+void main() {
+    vec3 col = renderAAx4();
+    col = cursor(getUV(vec2(0.0)), col);
     fragColor = vec4(col, 1.0);
 }
