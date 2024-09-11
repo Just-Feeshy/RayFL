@@ -69,14 +69,12 @@ void marchedSphere(ray r,
         out vec3 hitPos,
         out vec3 nor,
         out bool hit,
-        out float t,
         sampler2D text) {
     vec3 p = r.origin;
     float closestDist = CLOSEST_DIST;
     float minDist = MIN_DIST;
     int steps = 0;
     float dist = dot(p, p) + 1.0;
-    t = 0.0;
 
     while(closestDist > minDist && steps++ <= MAX_STEPS) {
         closestDist = distancePlanet(p, pl.radius, text, rot);
@@ -87,7 +85,6 @@ void marchedSphere(ray r,
             break;
         }
 
-        t += closestDist;
         p += r.direction * closestDist;
 
         if(dot(p, p) > dist * 1.25) {
@@ -99,7 +96,6 @@ void marchedSphere(ray r,
     // Check if we hit the sphere
     if(closestDist <= minDist + MIN_DIST) {
         hitPos = p;
-        vec3 pp = p / pl.radius;
         nor = normalize(p);
 
         hit = true;
@@ -135,7 +131,7 @@ void drawPlanet(ray r, planet pl, sampler2D text, float rot, inout vec3 combined
     bool hit = false;
     float t = 0.0;
 
-    marchedSphere(r, pl, rot, hitPos, nor, hit, t, text);
+    marchedSphere(r, pl, rot, hitPos, nor, hit, text);
 
     if(hit) {
         // combinedColor = vec3(1.0);

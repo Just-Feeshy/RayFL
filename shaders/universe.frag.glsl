@@ -3,7 +3,7 @@
 #include "cursor.glsl"
 #include "planet.glsl"
 
-#define MAX_TEXTURES 3
+#define MAX_TEXTURES 4
 #define EARTH_TILT 0.40840704496
 #define CLOSEST_DIST 100000000.0
 #define MAX_STEPS 80
@@ -21,13 +21,38 @@ out vec4 fragColor;
 
 const float FOV = 1.0;
 
+void drawEarth(ray r, planet pl, float rot, inout vec3 combinedColor) {
+    vec3 worldPos = r.origin - pl.position;
+    vec3 hitPos = vec3(0.0);
+    vec3 nor = vec3(0.0);
+    bool hit = false;
+
+    marchedSphere(r, pl, rot, hitPos, nor, hit, textures[0]);
+
+    vec3 lightDir = vec3(0.0, 0.0, 1.0);
+    float light = max(0.0, dot(nor, (normalize(lightDir) + 1.0) * 0.5));
+
+    vec2 earthUV = sphereUV(nor, rot);
+    earthUV.y *= 0.5;
+    vec4 earthColor = texture(textures[0], earthUV);
+
+    vec2 atmosphereUV = sphereUV(nor, rot * 1.5);
+    vec4 atmosphereColor = texture(textures[2], atmosphereUV);
+    vec4 nightColor = texture(textures[1], earthUV);
+
+    if(hit) {
+        combinedColor = (earthColor.rgb + (atmosphereColor.rgb * 0.5 * atmosphereColor.a)) * light + ((1.0 - light) * nightColor.rgb) * earthColor.a;
+
+    }
+}
+
 vec3 render(vec2 uv) {
     vec3 ro = iCam - vec3(0.0, 0.0, 100.0);
     vec3 rd = normalize(normalize(vec3(uv, FOV)) * iMat);
 
     vec3 col = vec3(0.0);
 
-    drawPlanet(ray(ro, rd), planet(vec3(0.0), 40.0), textures[0], iTime * 0.2, col);
+    drawEarth(ray(ro, rd), planet(vec3(0.0), 40.0), iTime * 0.2, col);
 
     return col;
 }
