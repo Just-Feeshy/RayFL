@@ -52,7 +52,6 @@ class Main {
             camera.position.x -= camera.front.x;
             camera.position.y -= camera.front.y;
             camera.position.z += camera.front.z;
-            // camera.position.z += 1;
         }
 
         if(input.controlStatus & Controls.MOVE_BACKWARDS != 0) {

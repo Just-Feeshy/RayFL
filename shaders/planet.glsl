@@ -48,8 +48,9 @@ vec2 sphereUV(vec3 p, float t) {
     p = rotateX(p, EARTH_TILT);
     p = rotateY(p, t);
 
+    float r = length(p);
     float phi = atan2(p.z, p.x);
-    return vec2(phi / TAU, acos(p.y) / PI);
+    return vec2(phi / TAU, acos(p.y / r) / PI);
 }
 
 float distancePlanet(vec3 p, float radius, sampler2D planetTexture, float rot) {

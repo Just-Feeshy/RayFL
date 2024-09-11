@@ -31,18 +31,18 @@ void drawEarth(ray r, planet pl, float rot, inout vec3 combinedColor) {
 
     vec3 lightDir = vec3(0.0, 0.0, 1.0);
     float light = max(0.0, dot(nor, (normalize(lightDir) + 1.0) * 0.5));
+    vec3 p = hitPos / pl.radius;
 
-    vec2 earthUV = sphereUV(nor, rot);
-    earthUV.y *= 0.5;
+    vec2 earthUV = sphereUV(p, rot);
+    //cearthUV.y *= 0.5;
     vec4 earthColor = texture(textures[0], earthUV);
 
-    vec2 atmosphereUV = sphereUV(nor, rot * 1.5);
+    vec2 atmosphereUV = sphereUV(p, rot * 1.5);
     vec4 atmosphereColor = texture(textures[2], atmosphereUV);
     vec4 nightColor = texture(textures[1], earthUV);
 
     if(hit) {
         combinedColor = (earthColor.rgb + (atmosphereColor.rgb * 0.5 * atmosphereColor.a)) * light + ((1.0 - light) * nightColor.rgb) * earthColor.a;
-
     }
 }
 
@@ -62,11 +62,11 @@ vec2 getUV(vec2 rayOffset) {
 }
 
 vec3 renderAAx4() {
-    //vec4 offsets = vec4(0.125, -0.125, 0.375, -0.375);
-    //vec3 colAA = render(getUV(offsets.xz)) + render(getUV(offsets.yw)) + render(getUV(offsets.wx)) + render(getUV(offsets.zy));
-    //return colAA * 0.25;
-    vec3 colAA = render(getUV(vec2(0.0)));
-    return colAA;
+    vec4 offsets = vec4(0.125, -0.125, 0.375, -0.375);
+    vec3 colAA = render(getUV(offsets.xz)) + render(getUV(offsets.yw)) + render(getUV(offsets.wx)) + render(getUV(offsets.zy));
+    return colAA * 0.25;
+    // vec3 colAA = render(getUV(vec2(0.0)));
+    // return colAA;
 }
 
 void main() {
