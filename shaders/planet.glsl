@@ -102,16 +102,6 @@ void marchedSphere(ray r,
         vec3 pp = p / pl.radius;
         nor = normalize(p);
 
-        vec3 tangent = normalize(nor * vec3(1.0, 0.0, 1.0));
-        tangent.xz = vec2(tangent.z, -tangent.x);
-        vec3 bitangent = -cross(nor, tangent);
-
-        vec2 texCoord = sphereUV(nor, rot);
-        texCoord.y = texCoord.y * 0.5 + 0.5;
-
-        vec3 texSample = texture(text, texCoord).rgb * 2.0 - 1.0;
-        // nor = normalize(texSample.r * tangent + texSample.g * bitangent + texSample.b * nor);
-
         hit = true;
     }else {
         hit = false;
