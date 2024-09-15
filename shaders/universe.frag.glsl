@@ -27,7 +27,8 @@ void drawEarth(ray r, planet pl, float rot, inout vec3 combinedColor) {
     vec3 nor = vec3(0.0);
     bool hit = false;
 
-    marchedSphere(r, pl, rot, hitPos, nor, hit, textures[0]);
+    march m = coneMarch(r, pl, rot, textures[0]);
+    marchedSphere(r, pl, rot, m, hitPos, nor, hit, textures[0]);
 
     vec3 lightDir = vec3(0.0, 0.0, 1.0);
     float light = max(0.0, dot(nor, (normalize(lightDir) + 1.0) * 0.5));

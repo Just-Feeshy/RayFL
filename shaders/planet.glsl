@@ -18,6 +18,11 @@ struct planet {
     float radius;
 };
 
+struct march {
+    float dist;
+    int steps;
+};
+
 float atan2(in float y, in float x) {
     return y > 0.0 ? atan(y, x) + PI : -atan(y, -x);
 }
@@ -64,9 +69,32 @@ float distancePlanet(vec3 p, float radius, sampler2D planetTexture, float rot) {
     return f - length(elevation.rgb) * elevationScale;
 }
 
+march coneMarch(ray r, planet pl, float rot, sampler2D text) {
+    float dist =0.0;
+    float cd = CLOSEST_DIST;
+    float ccr = 0.0; // Current Cone Radius
+    vec3 p = r.origin;
+    int steps = 0;
+
+    while(dist < CLOSEST_DIST && steps++ < MAX_STEPS) {
+        p = r.origin + r.direction * dist;
+        cd = distancePlanet(p, pl.radius, text, rot);
+        ccr = dist * 0.0625;
+
+        if(cd < ccr * 1.25) {
+            break;
+        }
+
+        dist += cd;
+    }
+
+    return march(dist, steps);
+}
+
 void marchedSphere(ray r,
         planet pl,
         float rot,
+        march m,
         out vec3 hitPos,
         out vec3 nor,
         out bool hit,
@@ -74,13 +102,13 @@ void marchedSphere(ray r,
     vec3 p = r.origin;
     float closestDist = CLOSEST_DIST;
     float minDist = MIN_DIST;
-    int steps = 0;
-    float dist = dot(p, p) + 1.0;
+    int steps = m.steps;
+    float dist = dot(p, p) + m.dist;
 
     while(closestDist > minDist && steps++ <= MAX_STEPS) {
         closestDist = distancePlanet(p, pl.radius, text, rot);
         float cameraDist = dot(r.origin - p, r.origin - p);
-        minDist = MIN_DIST + clamp(cameraDist / 40, 0.0, 0.0075);
+        minDist = MIN_DIST + clamp(cameraDist / 40, 0.0, 0.1);
 
         if(closestDist <= 0.0) {
             break;
@@ -132,7 +160,7 @@ void drawPlanet(ray r, planet pl, sampler2D text, float rot, inout vec3 combined
     bool hit = false;
     float t = 0.0;
 
-    marchedSphere(r, pl, rot, hitPos, nor, hit, text);
+    // marchedSphere(r, pl, rot, hitPos, nor, hit, text);
 
     if(hit) {
         // combinedColor = vec3(1.0);

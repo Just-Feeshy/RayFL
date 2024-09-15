@@ -1,5 +1,7 @@
 #version 450
 
+#include "planet.glsl"
+
 in vec2 pos;
 
 uniform vec2 iResolution;
