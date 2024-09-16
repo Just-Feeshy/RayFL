@@ -19,6 +19,9 @@ import kha.math.FastVector3;
 
     @:access(kha.math.FastVector3) public function collision(position:FastVector3):FastVector3 {
         for(sph in __spheres) {
+
+            // While doing this, I just did it through tip to tail vector subtraction
+            // I literally had a physics quiz on this exact same topic
             final sphereDist = position.sub(sph.getPositionVector());
             final deltaDist = sphereDist.length - (sph.radius + FIELD_OFFSET);
 
