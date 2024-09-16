@@ -12,12 +12,14 @@ import components.Input;
 import js.Browser.document;
 import js.Browser.window;
 import js.html.CanvasElement;
+import js.html.Element;
 import kha.Macros;
 #end
 
 class Main {
     private static var FRAMERATE = 60;
     private static var TAU = 2 * Math.PI;
+    private static var SPEED = 100.0;
 
     private var screen:Screen;
     private var camera:Camera;
@@ -51,17 +53,17 @@ class Main {
     // Update game logic here (Input)
     private function update():Void {
         if(input.controlStatus & Controls.MOVE_FOWARD != 0) {
-            camera.position.x -= camera.front.x;
-            camera.position.y -= camera.front.y;
-            camera.position.z += camera.front.z;
+            camera.position.x -= camera.front.x * SPEED;
+            camera.position.y -= camera.front.y * SPEED;
+            camera.position.z += camera.front.z * SPEED;
 
             __dirtyMovement = true;
         }
 
         if(input.controlStatus & Controls.MOVE_BACKWARDS != 0) {
-            camera.position.x += camera.front.x;
-            camera.position.y += camera.front.y;
-            camera.position.z -= camera.front.z;
+            camera.position.x += camera.front.x * SPEED;
+            camera.position.y += camera.front.y * SPEED;
+            camera.position.z -= camera.front.z * SPEED;
 
             __dirtyMovement = true;
         }
@@ -69,8 +71,8 @@ class Main {
         if(input.controlStatus & Controls.MOVE_RIGHT != 0) {
             var cross = camera.front.cross(camera.up).normalized();
 
-            camera.position.x -= cross.x;
-            camera.position.z += cross.z;
+            camera.position.x -= cross.x * SPEED;
+            camera.position.z += cross.z * SPEED;
 
             __dirtyMovement = true;
         }
@@ -78,20 +80,20 @@ class Main {
         if(input.controlStatus & Controls.MOVE_LEFT != 0) {
             var cross = camera.front.cross(camera.up).normalized();
 
-            camera.position.x += cross.x;
-            camera.position.z -= cross.z;
+            camera.position.x += cross.x * SPEED;
+            camera.position.z -= cross.z * SPEED;
 
             __dirtyMovement = true;
         }
-    }
-
-    private function render(framebuffer:Framebuffer) {
-        var g4 = framebuffer.g4;
 
         if(__dirtyMovement) {
             camera.position = screen.observableWorld.collision(camera.position);
             __dirtyMovement = false;
         }
+    }
+
+    private function render(framebuffer:Framebuffer) {
+        var g4 = framebuffer.g4;
 
         g4.begin();
         screen.render(g4);

@@ -3,7 +3,7 @@ package;
 import kha.math.FastVector3;
 
 @:allow(Screen) class World {
-    private static final FIELD_OFFSET = 1.0;
+    private static final FIELD_OFFSET = 160.0;
 
     public var length(default, null):Int = 0;
 
@@ -13,7 +13,7 @@ import kha.math.FastVector3;
     public function new() {
         // This is where my code starts
 
-        var sphere = new Sphere(0.0, 0.0, 0.0, 40.0);
+        var sphere = new Sphere(0.0, 0.0, 0.0, 6400.0);
         add(sphere);
     }
 

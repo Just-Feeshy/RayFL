@@ -28,6 +28,8 @@ vec4 unpackVec4FromTexture(int index) {
 }
 
 void drawEarth(ray r, planet pl, float rot, inout vec3 combinedColor) {
+    const float atmRadius = 0.625;
+
     vec3 worldPos = r.origin - pl.position;
     vec3 hitPos = vec3(0.0);
     vec3 nor = vec3(0.0);
@@ -47,8 +49,18 @@ void drawEarth(ray r, planet pl, float rot, inout vec3 combinedColor) {
     vec4 atmosphereColor = texture(textures[2], atmosphereUV);
     vec4 nightColor = texture(textures[1], earthUV);
 
-    if(hit) {
-        combinedColor = (earthColor.rgb + (atmosphereColor.rgb * 0.5 * atmosphereColor.a)) * light + ((1.0 - light) * nightColor.rgb) * earthColor.a;
+if(hit) {
+        combinedColor = (earthColor.rgb + (atmosphereColor.rgb * 0.5 * atmosphereColor.a)) * light + ((1.0 - sqrt(light)) * nightColor.rgb) * earthColor.a;
+    }
+
+    atmosphere atm = atmosphere(
+        vec3(0.529, 0.812, 0.922)
+    );
+
+    bool hitAtm = false;
+    vec2 atmRay = raySphereIntersect(r, pl.radius + atmRadius, hitAtm);
+
+    if(hitAtm) {
     }
 }
 
@@ -63,7 +75,7 @@ vec3 render(vec2 uv) {
     for(int i=0; i<iSpheresAmount; i++) {
         vec4 sphere = unpackVec4FromTexture(i);
         planet pl = planet(sphere.xyz, sphere.w);
-        drawEarth(r, pl, iTime * 0.2, col);
+        drawEarth(r, pl, iTime / 24, col);
     }
 
     return col;

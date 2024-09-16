@@ -18,7 +18,7 @@ class Camera {
 
     public function new() {
         front = new FastVector3(0, 0, 1);
-        position = new FastVector3(0, 0, -100);
+        position = new FastVector3(6500, 0, -12000);
         rotation = new FastVector2(0, 0);
         direction = new FastVector3(0, 0, 0);
         up = new FastVector3(0, 1, 0);

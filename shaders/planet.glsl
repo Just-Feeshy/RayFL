@@ -1,17 +1,13 @@
+#include "scatter.glsl"
 
 #define EARTH_TILT 0.40840704496
 #define CLOSEST_DIST 100000000.0
 #define MAX_STEPS 80
 #define MIN_DIST 0.00001
-#define PI 3.14159265
 #define TAU (2*PI)
 
-// Raymarching with multiple planets
 
-struct ray {
-    vec3 origin;
-    vec3 direction;
-};
+// Raymarching with multiple planets
 
 struct planet {
     vec3 position;
