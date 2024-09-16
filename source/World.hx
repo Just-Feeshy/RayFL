@@ -23,7 +23,9 @@ import kha.math.FastVector3;
             final deltaDist = sphereDist.length - (sph.radius + FIELD_OFFSET);
 
             if(deltaDist < 0.0) {
-                sphereDist.set_length(1.0);
+                sphereDist.set_length(1.0); // Normalize our vector
+
+                // Now multiply our normalized vector by our radius boundary
                 return sphereDist.mult(sph.radius + FIELD_OFFSET);
             }
         }
