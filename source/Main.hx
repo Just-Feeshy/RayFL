@@ -23,6 +23,8 @@ class Main {
     private var camera:Camera;
     private var input:Input;
 
+    @:noCompletion private var __dirtyMovement:Bool = false;
+
     private function new() {
         var w = Window.get(0).width;
         var h = Window.get(0).height;
@@ -52,13 +54,16 @@ class Main {
             camera.position.x -= camera.front.x;
             camera.position.y -= camera.front.y;
             camera.position.z += camera.front.z;
+
+            __dirtyMovement = true;
         }
 
         if(input.controlStatus & Controls.MOVE_BACKWARDS != 0) {
             camera.position.x += camera.front.x;
             camera.position.y += camera.front.y;
             camera.position.z -= camera.front.z;
-            // camera.position.z -= 1;
+
+            __dirtyMovement = true;
         }
 
         if(input.controlStatus & Controls.MOVE_RIGHT != 0) {
@@ -66,6 +71,8 @@ class Main {
 
             camera.position.x -= cross.x;
             camera.position.z += cross.z;
+
+            __dirtyMovement = true;
         }
 
         if(input.controlStatus & Controls.MOVE_LEFT != 0) {
@@ -73,11 +80,18 @@ class Main {
 
             camera.position.x += cross.x;
             camera.position.z -= cross.z;
+
+            __dirtyMovement = true;
         }
     }
 
     private function render(framebuffer:Framebuffer) {
         var g4 = framebuffer.g4;
+
+        if(__dirtyMovement) {
+            camera.position = screen.observableWorld.collision(camera.position);
+            __dirtyMovement = false;
+        }
 
         g4.begin();
         screen.render(g4);

@@ -8,8 +8,9 @@ class Camera {
     @:noCompletion private var __matrix_rot_x(default, null):FastMatrix3;
     @:noCompletion private var __matrix_rot_y(default, null):FastMatrix3;
 
+    public var position:FastVector3;
+
     public var front(default, null):FastVector3;
-    public var position(default, null):FastVector3;
     public var rotation(default, null):FastVector2;
     public var direction(default, null):FastVector3;
     public var up(default, null):FastVector3;
@@ -17,7 +18,7 @@ class Camera {
 
     public function new() {
         front = new FastVector3(0, 0, 1);
-        position = new FastVector3(0, 0, 0);
+        position = new FastVector3(0, 0, -100);
         rotation = new FastVector2(0, 0);
         direction = new FastVector3(0, 0, 0);
         up = new FastVector3(0, 1, 0);
