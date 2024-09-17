@@ -2,6 +2,7 @@
 
 #include "cursor.glsl"
 #include "planet.glsl"
+#include "map.glsl"
 
 #define MAX_TEXTURES 4
 #define EARTH_TILT 0.40840704496
@@ -28,9 +29,6 @@ vec4 unpackVec4FromTexture(int index) {
 }
 
 void drawEarth(ray r, planet pl, float rot, inout vec3 combinedColor) {
-    const float atmRadius = 0.625;
-
-    vec3 worldPos = r.origin - pl.position;
     vec3 hitPos = vec3(0.0);
     vec3 nor = vec3(0.0);
     bool hit = false;
@@ -38,8 +36,12 @@ void drawEarth(ray r, planet pl, float rot, inout vec3 combinedColor) {
     march m = coneMarch(r, pl, rot, textures[0]);
     marchedSphere(r, pl, rot, m, hitPos, nor, hit, textures[0]);
 
-    vec3 lightDir = vec3(3.0, 0.0, 0.0);
-    float light = max(0.0, dot(nor, (normalize(lightDir) + 1.0) * 0.5));
+    vec3 lightDir = normalize(vec3(3.0, 0.0, 0.0));
+    float light = max(0.0, (dot(nor, lightDir) + 1.0) * 0.5);
+    float terminatorLight = dot(normalize(hitPos), lightDir);
+    terminatorLight = map(terminatorLight, -0.2, 0.3, 0.0, 1.0);
+    terminatorLight = smoothstep(0.0, 1.0, terminatorLight);
+
     vec3 p = hitPos / pl.radius;
 
     vec2 earthUV = sphereUV(p, rot);
@@ -50,18 +52,33 @@ void drawEarth(ray r, planet pl, float rot, inout vec3 combinedColor) {
     vec4 nightColor = texture(textures[1], earthUV);
 
 if(hit) {
-        combinedColor = (earthColor.rgb + (atmosphereColor.rgb * 0.5 * atmosphereColor.a)) * light + ((1.0 - sqrt(light)) * nightColor.rgb) * earthColor.a;
+        combinedColor = (earthColor.rgb + (atmosphereColor.rgb * 0.5 * atmosphereColor.a)) * sqrt(terminatorLight * light) + ((1.0 - sqrt(terminatorLight * light)) * nightColor.rgb) * earthColor.a;
     }
 
+/*
     atmosphere atm = atmosphere(
-        vec3(0.529, 0.812, 0.922)
+        vec3(135, 208, 235),
+        10000.0,
+        100.0
     );
 
     bool hitAtm = false;
-    vec2 atmRay = raySphereIntersect(r, pl.radius + atmRadius, hitAtm);
+    vec2 atmRay = raySphereIntersect(r, pl.radius + atm.thinkness, hitAtm);
 
     if(hitAtm) {
+        const float epsilon = 0.001;
+        float minDist = atmRay.x + epsilon;
+        float maxDist = atmRay.y - epsilon;
+
+        vec3 atmPos = r.origin + r.direction * minDist;
+        vec3 atmDir = r.origin + r.direction * maxDist;
+        float atmDensity = 0.0;
+        vec3 atmLight = lightPath(atmPos, atmDir, lightDir, atmDensity, pl.radius, atm);
+
+        const vec3 ex = exp(-atmDensity * wavelength(atm));
+        combinedColor = clamp(combinedColor * ex, 0.0, 1.0) + atmLight * 0.1;
     }
+*/
 }
 
 vec3 render(vec2 uv) {
@@ -70,11 +87,11 @@ vec3 render(vec2 uv) {
 
     vec3 col = vec3(0.0);
 
-    ray r = ray(ro, rd);
 
     for(int i=0; i<iSpheresAmount; i++) {
         vec4 sphere = unpackVec4FromTexture(i);
         planet pl = planet(sphere.xyz, sphere.w);
+        ray r = ray(ro - pl.position, rd);
         drawEarth(r, pl, iTime / 24, col);
     }
 
