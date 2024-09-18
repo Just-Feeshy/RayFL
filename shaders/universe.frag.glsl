@@ -78,7 +78,7 @@ if(hit) {
         const vec3 ex = exp(-atmDensity * wavelength(atm));
         combinedColor = clamp(combinedColor * ex, 0.0, 1.0) + atmLight * 0.1;
     }
-*/
+    */
 }
 
 vec3 render(vec2 uv) {

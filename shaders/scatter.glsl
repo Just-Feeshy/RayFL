@@ -66,7 +66,7 @@ vec4 scatter(vec3 p, float delta, ray r, vec3 lightDir, float density, float rad
 
     vec3 transmittance = exp(-(lightOpticalDepth + density + totalDensityDiff) * wavelength(atm));
 
-    vec3 color = d * transmittance * phase_ray(acos(dot(r.direction, lightDir)));
+    vec3 color = d * transmittance * wavelength(atm) * phase_ray(acos(dot(r.direction, lightDir)));
     return vec4(color, totalDensityDiff);
 }
 
